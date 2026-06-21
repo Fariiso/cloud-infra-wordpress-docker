@@ -1,0 +1,38 @@
+services:
+  db:
+    image: mariadb:10.11
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    volumes:
+      # Saves database data locally inside your project folder on your laptop
+      - ./local_db_data:/var/lib/mysql
+
+  wordpress:
+    image: wordpress:latest
+    restart: always
+    depends_on:
+      - db
+    environment:
+      WORDPRESS_DB_HOST: db:3306
+      WORDPRESS_DB_USER: ${MYSQL_USER}
+      WORDPRESS_DB_PASSWORD: ${MYSQL_PASSWORD}
+      WORDPRESS_DB_NAME: ${MYSQL_DATABASE}
+    volumes:
+      # Saves WordPress core files locally inside your project folder on your laptop
+      - ./local_wp_data:/var/www/html
+
+  nginx:
+    image: nginx:alpine
+    restart: always
+    ports:
+      - "80:80"   # Open standard web port on your laptop (http://localhost)
+      - "443:443" # Open secure web port on your laptop
+    depends_on:
+      - wordpress
+    volumes:
+      # Mounts the local routing configuration folder
+      - ./modules/compute_server/config/nginx:/etc/nginx/conf.d

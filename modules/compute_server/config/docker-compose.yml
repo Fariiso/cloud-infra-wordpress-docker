@@ -1,0 +1,35 @@
+services:
+  db:
+    image: mariadb:10.11
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    volumes:
+      - /mnt/wordpress_data_volume/db_data:/var/lib/mysql
+
+  wordpress:
+    image: wordpress:latest
+    restart: always
+    depends_on:
+      - db
+    environment:
+      WORDPRESS_DB_HOST: db:3306
+      WORDPRESS_DB_USER: ${MYSQL_USER}
+      WORDPRESS_DB_PASSWORD: ${MYSQL_PASSWORD}
+      WORDPRESS_DB_NAME: ${MYSQL_DATABASE}
+    volumes:
+      - /mnt/wordpress_data_volume/wp_data:/var/www/html
+
+  nginx:
+    image: nginx:alpine
+    restart: always
+    ports:
+      - "80:80"   # Open public HTTP port
+      - "443:443" # Open public HTTPS port
+    depends_on:
+      - wordpress
+    volumes:
+      - ./nginx:/etc/nginx/conf.d # Mounts our routing configuration folder
