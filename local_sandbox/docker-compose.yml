@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  db:
+    image: mariadb:10.11
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${db_root_password}
+      MYSQL_DATABASE: ${db_name}
+      MYSQL_USER: ${db_user}
+      MYSQL_PASSWORD: ${db_password}
+    volumes:
+      # Point directly to a folder on the new 10 GB hard drive
+      - /mnt/wordpress_data_volume/db_data:/var/lib/mysql
+
+  wordpress:
+    image: wordpress:latest
+    restart: always
+    depends_on:
+      - db
+    environment:
+      WORDPRESS_DB_HOST: db:3306
+      WORDPRESS_DB_USER: ${db_user}
+      WORDPRESS_DB_PASSWORD: ${db_password}
+      WORDPRESS_DB_NAME: ${db_name}
+    volumes:
+      - /mnt/wordpress_data_volume/wp_data:/var/www/html
+    # NOTE: We remove the public port 80 mapping from WordPress because
+    # Nginx will handle the outside world now!
+
+  nginx:
+    image: nginx:alpine
+    restart: always
+    ports:
+      - "80:80"   # Open standard web port to the outside world
+      - "443:443" # Open secure web port to the outside world
+    depends_on:
+      - wordpress
+    volumes:
+      - ./nginx:/etc/nginx/conf.d # We will create this configuration folder next!!
