@@ -1,0 +1,15 @@
+---
+- name: Configure Web Servers
+  hosts: webservers
+  become: true  # Runs commands with administrative privileges (sudo)
+
+  tasks:
+    - name: Ensure the server is fully updated
+      apt:
+        update_cache: yes
+        upgrade: dist
+      when: ansible_os_family == "Debian"
+
+    - name: Test the connection by printing a message
+      debug:
+        msg: "Ansible successfully connected to the server!"
