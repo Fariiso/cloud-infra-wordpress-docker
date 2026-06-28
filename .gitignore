@@ -1,14 +1,13 @@
 # Ignore the secret variables vault
 terraform.tfvars
-*.env
-.env
-**/modules/config/.env  # Explicitly catches the file inside your module
+**/.env
+modules/compute_server/config/.env
 
 # Ignore local Terraform state and history files
 .terraform/
 *.tfstate
 *.tfstate.*
-.tfstate.backup
+*.tfstate.backup
 
 # Ignore local IDE settings
 .idea/
